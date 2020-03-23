@@ -57,7 +57,7 @@ import UIKit
         let payTotalCents = afterTaxCents + tipCents
         payTotal.text = payTotalCents.formattedDollars
 
-        if (afterTaxCents > 0 && itemTotalCents > 0) {
+        if (afterTaxCents > 0 && itemTotalCents > 0 && afterTaxCents >= itemTotalCents) {
             let taxCents = afterTaxCents - itemTotalCents
             let taxRatio = Double(taxCents) / Double(itemTotalCents)
             taxPercent.text = taxRatio.formatPercent(precision: 2)
