@@ -20,6 +20,10 @@ import UIKit
     @IBOutlet weak var tipPercent: UILabel!
     @IBOutlet weak var taxPercent: UILabel!
     @IBOutlet weak var bothPercent: UILabel!
+    @IBOutlet weak var person1Pay: UILabel!
+    @IBOutlet weak var person2Pay: UILabel!
+    @IBOutlet weak var payRemainder: UILabel!
+    @IBOutlet weak var remainderItemTotal: UILabel!
     
     @IBOutlet weak var tipSelector: UIPickerView!
     
@@ -35,7 +39,7 @@ import UIKit
         person1ItemTotalField.addTarget(self, action: #selector(currencyFieldChanged), for: .editingChanged)
         person2ItemTotalField.addTarget(self, action: #selector(currencyFieldChanged), for: .editingChanged)
         
-        tipSelector.selectRow(7, inComponent:0, animated:true)
+        tipSelector.selectRow(15, inComponent:0, animated:true)
         
         let tap = UITapGestureRecognizer(target: self.view, action: #selector(UIView.endEditing))
         
@@ -59,19 +63,44 @@ import UIKit
 
         if (afterTaxCents > 0 && itemTotalCents > 0 && afterTaxCents >= itemTotalCents) {
             let taxCents = afterTaxCents - itemTotalCents
-            let taxRatio = Double(taxCents) / Double(itemTotalCents)
-            taxPercent.text = taxRatio.formatPercent(precision: 2)
+            let taxFraction = Double(taxCents) / Double(itemTotalCents)
+            taxPercent.text = taxFraction.formatPercent(precision: 2)
             
-            let tipRatio = Double(tipCents) / Double(itemTotalCents)
-            tipPercent.text = tipRatio.formatPercent(precision: 2)
+            let tipFraction = Double(tipCents) / Double(itemTotalCents)
+            tipPercent.text = tipFraction.formatPercent(precision: 2)
             
-            let bothRatio = (Double(payTotalCents) / Double(itemTotalCents) - 1)
-            bothPercent.text = bothRatio.formatPercent(precision: 2)
+            let bothRatio = Double(payTotalCents) / Double(itemTotalCents)
+            let bothFraction = bothRatio - 1
+            bothPercent.text = bothFraction.formatPercent(precision: 2)
+            
+            let person1PayCents = Int((Double(person1ItemCents) * bothRatio).rounded(.down))
+            person1Pay.text = person1PayCents.formattedDollars
+            
+            let person2PayCents = Int((Double(person2ItemCents) * bothRatio).rounded(.down))
+            person2Pay.text = person2PayCents.formattedDollars
+            
+            if (person1ItemCents + person2ItemCents <= itemTotalCents) {
+            
+                let remainderItemCents = itemTotalCents - person1ItemCents - person2ItemCents
+                remainderItemTotal.text = remainderItemCents.formattedDollars
+                
+                let remainderPayCents = payTotalCents - person1PayCents - person2PayCents
+                payRemainder.text = remainderPayCents.formattedDollars
+            }
+            else {
+                payRemainder.text = "???"
+                remainderItemTotal.text = "???"
+            }
+            
         }
         else {
             tipPercent.text = "???"
             taxPercent.text = "???"
             bothPercent.text = "???"
+            person1Pay.text = "???"
+            person2Pay.text = "???"
+            payRemainder.text = "???"
+            remainderItemTotal.text = "???"
         }
     }
     
@@ -103,6 +132,24 @@ import UIKit
     
     var itemTotalCents: Int {
         if let text = itemTotalField.text {
+            return text.cents
+        }
+        else {
+            return 0
+        }
+    }
+    
+    var person1ItemCents : Int {
+        if let text = person1ItemTotalField.text {
+            return text.cents
+        }
+        else {
+            return 0
+        }
+    }
+    
+    var person2ItemCents : Int {
+        if let text = person2ItemTotalField.text {
             return text.cents
         }
         else {
